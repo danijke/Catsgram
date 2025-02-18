@@ -7,6 +7,7 @@ import ru.yandex.practicum.catsgram.model.*;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -15,8 +16,14 @@ public class PostService {
 
     private final Map<Long, Post> posts = new HashMap<>();
 
-    public Collection<Post> findAll() {
-        return posts.values();
+    public Collection<Post> findAll(int from, int size, String sort) {
+        return posts.values().stream()
+                .sorted(sort.equalsIgnoreCase("asc") ?
+                        Comparator.comparing(Post::getPostDate) :
+                        Comparator.comparing(Post::getPostDate).reversed())
+                .skip(from)
+                .limit(size)
+                .collect(Collectors.toList());
     }
 
     public Post create(Post post) {
@@ -59,5 +66,10 @@ public class PostService {
                 .max()
                 .orElse(0);
         return ++currentMaxId;
+    }
+
+    public Post getPostById(Long id) {
+        return Optional.ofNullable(posts.get(id))
+                .orElseThrow(() -> new NotFoundException("Пост с id: " + id + " не найден"));
     }
 }

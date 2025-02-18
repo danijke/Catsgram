@@ -61,4 +61,9 @@ public class UserService {
                 .orElse(0);
         return ++currentMaxId;
     }
+
+    public User getUserById(Long id) {
+        return Optional.ofNullable(users.get(id))
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + id + " не найден"));
+    }
 }

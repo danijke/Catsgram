@@ -3,6 +3,7 @@ package ru.yandex.practicum.catsgram.model;
 import lombok.*;
 
 @Data
+@Builder
 @EqualsAndHashCode(of = {"id"})
 public class Image {
     Long id;
