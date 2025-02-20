@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.multipart.MultipartFile;
-import ru.yandex.practicum.catsgram.exception.NotFoundException;
+import ru.yandex.practicum.catsgram.exception.*;
 import ru.yandex.practicum.catsgram.model.*;
 
 import java.io.IOException;
@@ -28,6 +28,32 @@ public class ImageService {
                 .stream()
                 .filter(image -> image.getPostId() == postId)
                 .toList();
+    }
+
+    public ImageData getImageData(long imageId) {
+        if (!images.containsKey(imageId)) {
+            throw new NotFoundException("Изображение с id = " + imageId + " не найдено");
+        }
+
+        Image image = images.get(imageId);
+        byte[] data = loadFile(image);
+
+        return new ImageData(data, image.getOriginalFileName());
+    }
+
+    private byte[] loadFile(Image image) {
+        Path path = Paths.get(image.getFilePath());
+        if (Files.exists(path)) {
+            try {
+                return Files.readAllBytes(path);
+            } catch (IOException e) {
+                throw new ImageFileException("Ошибка чтения файла, id: " + image.getId()
+                        + ", name: " + image.getOriginalFileName(), e);
+            }
+        } else {
+            throw new ImageFileException("Файл не найден, id: " + image.getId()
+                    + ", name: " + image.getOriginalFileName());
+        }
     }
 
     public List<Image> saveImages(long postId, List<MultipartFile> files) {
